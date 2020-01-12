@@ -58,12 +58,4 @@ namespace MongoDB.Data
             Id = ObjectId.GenerateNewId().ToString();
         }
     }
-
-    public abstract class Model<T> : Model
-    {
-        /// <summary>
-        /// Generic content
-        /// </summary>
-        public T Content { get; set; }
-    }
 }

@@ -90,6 +90,17 @@ namespace MongoDB.Data
         }
 
         /// <summary>
+        /// updater for collection
+        /// </summary>
+        public IndexKeysDefinitionBuilder<T> IndexKeys
+        {
+            get
+            {
+                return Builders<T>.IndexKeys;
+            }
+        }
+
+        /// <summary>
         /// where you need to define a connectionString with the name of repository
         /// </summary>
         /// <param name="config">config interface to read default settings</param>
@@ -122,12 +133,23 @@ namespace MongoDB.Data
             return Collection.Find(filter);
         }
 
+        private IFindFluent<T, T> Query(FilterDefinition<T> filter)
+        {
+            return Collection.Find(filter);
+        }
+
         private IFindFluent<T, T> Query()
         {
             return Collection.Find(Filter.Empty);
         }
 
         private IFindFluent<T, T> Query(Expression<Func<T, bool>> filter, Expression<Func<T, object>> order, int pageIndex, int size, bool isDescending)
+        {
+            var query = Query(filter).Skip(pageIndex * size).Limit(size);
+            return (isDescending ? query.SortByDescending(order) : query.SortBy(order));
+        }
+
+        private IFindFluent<T, T> Query(FilterDefinition<T> filter, Expression<Func<T, object>> order, int pageIndex, int size, bool isDescending)
         {
             var query = Query(filter).Skip(pageIndex * size).Limit(size);
             return (isDescending ? query.SortByDescending(order) : query.SortBy(order));
@@ -271,12 +293,25 @@ namespace MongoDB.Data
             return Query(filter).ToEnumerable();
         }
 
+        public virtual IEnumerable<T> Find(FilterDefinition<T> filter)
+        {
+            return Query(filter).ToEnumerable();
+        }
+
         /// <summary>
         /// find models async
         /// </summary>
         /// <param name="filter">expression filter</param>
         /// <returns>collection of model</returns>
         public virtual Task<List<T>> FindAsync(Expression<Func<T, bool>> filter)
+        {
+            return Retry(() =>
+            {
+                return Query(filter).ToListAsync();
+            });
+        }
+
+        public virtual Task<List<T>> FindAsync(FilterDefinition<T> filter)
         {
             return Retry(() =>
             {
@@ -296,6 +331,11 @@ namespace MongoDB.Data
             return Find(filter, i => i.Id, pageIndex, size);
         }
 
+        public IEnumerable<T> Find(FilterDefinition<T> filter, int pageIndex, int size)
+        {
+            return Find(filter, i => i.Id, pageIndex, size);
+        }
+
         /// <summary>
         /// find models async with paging
         /// </summary>
@@ -304,6 +344,11 @@ namespace MongoDB.Data
         /// <param name="size">number of items in page</param>
         /// <returns>collection of model</returns>
         public Task<List<T>> FindAsync(Expression<Func<T, bool>> filter, int pageIndex, int size)
+        {
+            return FindAsync(filter, i => i.Id, pageIndex, size);
+        }
+
+        public Task<List<T>> FindAsync(FilterDefinition<T> filter, int pageIndex, int size)
         {
             return FindAsync(filter, i => i.Id, pageIndex, size);
         }
@@ -322,6 +367,11 @@ namespace MongoDB.Data
             return Find(filter, order, pageIndex, size, true);
         }
 
+        public IEnumerable<T> Find(FilterDefinition<T> filter, Expression<Func<T, object>> order, int pageIndex, int size)
+        {
+            return Find(filter, order, pageIndex, size, true);
+        }
+
         /// <summary>
         /// find models async with paging and ordering
         /// default ordering is descending
@@ -332,6 +382,11 @@ namespace MongoDB.Data
         /// <param name="size">number of items in page</param>
         /// <returns>collection of model</returns>
         public Task<List<T>> FindAsync(Expression<Func<T, bool>> filter, Expression<Func<T, object>> order, int pageIndex, int size)
+        {
+            return FindAsync(filter, order, pageIndex, size, true);
+        }
+
+        public Task<List<T>> FindAsync(FilterDefinition<T> filter, Expression<Func<T, object>> order, int pageIndex, int size)
         {
             return FindAsync(filter, order, pageIndex, size, true);
         }
@@ -353,6 +408,14 @@ namespace MongoDB.Data
             });
         }
 
+        public virtual IEnumerable<T> Find(FilterDefinition<T> filter, Expression<Func<T, object>> order, int pageIndex, int size, bool isDescending)
+        {
+            return Retry(() =>
+            {
+                return Query(filter, order, pageIndex, size, isDescending).ToEnumerable();
+            });
+        }
+
         /// <summary>
         /// find models async with paging and ordering in direction
         /// </summary>
@@ -362,6 +425,14 @@ namespace MongoDB.Data
         /// <param name="size">number of items in page</param>
         /// <param name="isDescending">ordering direction</param>
         /// <returns>collection of model</returns>
+        public virtual Task<List<T>> FindAsync(FilterDefinition<T> filter, Expression<Func<T, object>> order, int pageIndex, int size, bool isDescending)
+        {
+            return Retry(() =>
+            {
+                return Query(filter, order, pageIndex, size, isDescending).ToListAsync();
+            });
+        }
+
         public virtual Task<List<T>> FindAsync(Expression<Func<T, bool>> filter, Expression<Func<T, object>> order, int pageIndex, int size, bool isDescending)
         {
             return Retry(() =>
@@ -1073,6 +1144,84 @@ namespace MongoDB.Data
             });
         }
         #endregion Count
+
+        #region Indexing
+        public string CreateIndex(IndexKeysDefinition<T> keys)
+        {
+            return Retry(() =>
+            {
+                return Collection.Indexes.CreateOne(new CreateIndexModel<T>(keys));
+            });
+        }
+
+        public Task<string> CreateIndexAsync(IndexKeysDefinition<T> keys)
+        {
+            return Retry(() =>
+            {
+                return Collection.Indexes.CreateOneAsync(new CreateIndexModel<T>(keys));
+            });
+        }
+
+        public IEnumerable<string> CreateIndexMany(params IndexKeysDefinition<T>[] keys)
+        {
+            return Retry(() =>
+            {
+                var models = new List<CreateIndexModel<T>>();
+                foreach(var item in keys)
+                    models.Add(new CreateIndexModel<T>(item));
+
+                return Collection.Indexes.CreateMany(models);
+            });
+        }
+
+        public Task<IEnumerable<string>> CreateIndexManyAsync(params IndexKeysDefinition<T>[] keys)
+        {
+            return Retry(() =>
+            {
+                var models = new List<CreateIndexModel<T>>();
+                foreach (var item in keys)
+                    models.Add(new CreateIndexModel<T>(item));
+
+                return Collection.Indexes.CreateManyAsync(models);
+            });
+        }
+
+        public void DropIndex(string name)
+        {
+            Retry(() =>
+            {
+                Collection.Indexes.DropOne(name);
+
+                return true;
+            });
+        }
+
+        public Task DropIndexAsync(string name)
+        {
+            return Retry(() =>
+            {
+                return Collection.Indexes.DropOneAsync(name);
+            });
+        }
+
+        public void DropIndexAll()
+        {
+            Retry(() =>
+            {
+                Collection.Indexes.DropAll();
+
+                return true;
+            });
+        }
+
+        public Task DropIndexAllAsync()
+        {
+            return Retry(() =>
+            {
+                return Collection.Indexes.DropAllAsync();
+            });
+        }
+        #endregion Indexing
 
         #endregion Utils
 

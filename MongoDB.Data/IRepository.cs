@@ -36,6 +36,11 @@ namespace MongoDB.Data
 
         List<UpdateDefinition<T>> Updaters { get; }
 
+        /// <summary>
+        /// index keys for collection
+        /// </summary>
+        IndexKeysDefinitionBuilder<T> IndexKeys { get; }
+
         #endregion MongoSpecific
 
         #region CRUD
@@ -107,6 +112,7 @@ namespace MongoDB.Data
         /// <param name="filter">expression filter</param>
         /// <returns>collection of Model</returns>
         IEnumerable<T> Find(Expression<Func<T, bool>> filter);
+        IEnumerable<T> Find(FilterDefinition<T> filter);
 
         /// <summary>
         /// find models async
@@ -114,6 +120,7 @@ namespace MongoDB.Data
         /// <param name="filter">expression filter</param>
         /// <returns>collection of Model</returns>
         Task<List<T>> FindAsync(Expression<Func<T, bool>> filter);
+        Task<List<T>> FindAsync(FilterDefinition<T> filter);
 
         /// <summary>
         /// find models with paging
@@ -123,6 +130,7 @@ namespace MongoDB.Data
         /// <param name="size">number of items in page</param>
         /// <returns>collection of Model</returns>
         IEnumerable<T> Find(Expression<Func<T, bool>> filter, int pageIndex, int size);
+        IEnumerable<T> Find(FilterDefinition<T> filter, int pageIndex, int size);
 
         /// <summary>
         /// find models async with paging
@@ -132,6 +140,7 @@ namespace MongoDB.Data
         /// <param name="size">number of items in page</param>
         /// <returns>collection of Model</returns>
         Task<List<T>> FindAsync(Expression<Func<T, bool>> filter, int pageIndex, int size);
+        Task<List<T>> FindAsync(FilterDefinition<T> filter, int pageIndex, int size);
 
         /// <summary>
         /// find models with paging and ordering
@@ -143,6 +152,7 @@ namespace MongoDB.Data
         /// <param name="size">number of items in page</param>
         /// <returns>collection of Model</returns>
         IEnumerable<T> Find(Expression<Func<T, bool>> filter, Expression<Func<T, object>> order, int pageIndex, int size);
+        IEnumerable<T> Find(FilterDefinition<T> filter, Expression<Func<T, object>> order, int pageIndex, int size);
 
         /// <summary>
         /// find models async with paging and ordering
@@ -154,6 +164,7 @@ namespace MongoDB.Data
         /// <param name="size">number of items in page</param>
         /// <returns>collection of Model</returns>
         Task<List<T>> FindAsync(Expression<Func<T, bool>> filter, Expression<Func<T, object>> order, int pageIndex, int size);
+        Task<List<T>> FindAsync(FilterDefinition<T> filter, Expression<Func<T, object>> order, int pageIndex, int size);
 
         /// <summary>
         /// find models with paging and ordering in direction
@@ -165,6 +176,7 @@ namespace MongoDB.Data
         /// <param name="isDescending">ordering direction</param>
         /// <returns>collection of Model</returns>
         IEnumerable<T> Find(Expression<Func<T, bool>> filter, Expression<Func<T, object>> order, int pageIndex, int size, bool isDescending);
+        IEnumerable<T> Find(FilterDefinition<T> filter, Expression<Func<T, object>> order, int pageIndex, int size, bool isDescending);
 
         /// <summary>
         /// find models async with paging and ordering in direction
@@ -176,6 +188,7 @@ namespace MongoDB.Data
         /// <param name="isDescending">ordering direction</param>
         /// <returns>collection of Model</returns>
         Task<List<T>> FindAsync(Expression<Func<T, bool>> filter, Expression<Func<T, object>> order, int pageIndex, int size, bool isDescending);
+        Task<List<T>> FindAsync(FilterDefinition<T> filter, Expression<Func<T, object>> order, int pageIndex, int size, bool isDescending);
 
         #endregion Find
 
@@ -606,6 +619,24 @@ namespace MongoDB.Data
 
         Task<long> EstimatedCountAsync();
         #endregion Count
+
+        #region Indexing
+        string CreateIndex(IndexKeysDefinition<T> keys);
+
+        Task<string> CreateIndexAsync(IndexKeysDefinition<T> keys);
+
+        IEnumerable<string> CreateIndexMany(params IndexKeysDefinition<T>[] keys);
+
+        Task<IEnumerable<string>> CreateIndexManyAsync(params IndexKeysDefinition<T>[] keys);
+
+        void DropIndex(string name);
+
+        Task DropIndexAsync(string name);
+
+        void DropIndexAll();
+
+        Task DropIndexAllAsync();
+        #endregion
 
         #endregion Utils
     }
