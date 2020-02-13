@@ -2,6 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageVersion>1.0</PackageVersion>
+    <Authors>Pratama Bayu Widagdo</Authors>
+    <Description>MongoDB data utility</Description>
+    <PackageId>pratamabayu</PackageId>
   </PropertyGroup>
 
   <ItemGroup>
