@@ -23,4 +23,4 @@ jobs:
         with:
           PROJECT_FILE_PATH: MongoDB.Data/MongoDB.Data.csproj # Relative to repository root
           VERSION_REGEX: <PackageVersion>(.*)<\/PackageVersion> # Regex pattern to extract version info in a capturing group
-          NUGET_KEY: ${{secrets.NUGET_API_KEY}} # nuget.org API key
+          NUGET_KEY: ${{secrets.NUGET_KEY}} # nuget.org API key
