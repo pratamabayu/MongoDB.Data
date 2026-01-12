@@ -1,26 +1,35 @@
 name: publish to nuget
+
 on:
   push:
     branches:
-      - master # Your default release branch
+      - master
+
 jobs:
   publish:
-    name: list on nuget
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
 
-      # Required for a specific dotnet version that doesn't come with ubuntu-latest / windows-latest
-      # Visit bit.ly/2synnZl to see the list of SDKs that are pre-installed with ubuntu-latest / windows-latest
-      # - name: Setup dotnet
-      #   uses: actions/setup-dotnet@v1
-      #   with:
-      #     dotnet-version: 3.1.100
-      
-      # Publish
-      - name: publish on version change
-        uses: rohith/publish-nuget@v2
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
         with:
-          PROJECT_FILE_PATH: MongoDB.Data/MongoDB.Data.csproj # Relative to repository root
-          VERSION_REGEX: <PackageVersion>(.*)<\/PackageVersion> # Regex pattern to extract version info in a capturing group
-          NUGET_KEY: ${{secrets.NUGET_KEY}} # nuget.org API key
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore MongoDB.Data/MongoDB.Data.csproj
+
+      - name: Build
+        run: dotnet build MongoDB.Data/MongoDB.Data.csproj --configuration Release --no-restore
+
+      - name: Pack
+        run: dotnet pack MongoDB.Data/MongoDB.Data.csproj --configuration Release --no-build -o ./nupkg
+
+      - name: Publish to NuGet
+        run: |
+          dotnet nuget push ./nupkg/*.nupkg \
+            --api-key ${{ secrets.NUGET_KEY }} \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate
