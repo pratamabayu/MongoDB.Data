@@ -10,7 +10,7 @@ namespace MongoDB.Data
         /// <summary>
         /// create date
         /// </summary>
-        DateTime CreatedOn { get; }
+        DateTime CreatedAt { get; }
 
         /// <summary>
         /// id in string format
@@ -21,7 +21,7 @@ namespace MongoDB.Data
         /// <summary>
         /// modify date
         /// </summary>
-        DateTime ModifiedOn { get; }
+        DateTime ModifiedAt { get; }
 
         /// <summary>
         /// id in objectId format

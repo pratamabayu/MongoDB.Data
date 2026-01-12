@@ -979,8 +979,8 @@ namespace MongoDB.Data
         {
             return Retry(() =>
             {
-                var update = Updater.Combine(updates).CurrentDate(i => i.ModifiedOn);
-                return Collection.UpdateMany(filter, update.CurrentDate(i => i.ModifiedOn)).IsAcknowledged;
+                var update = Updater.Combine(updates).CurrentDate(i => i.ModifiedAt);
+                return Collection.UpdateMany(filter, update.CurrentDate(i => i.ModifiedAt)).IsAcknowledged;
             });
         }
 
@@ -993,8 +993,8 @@ namespace MongoDB.Data
         {
             return Retry(async () =>
             {
-                var update = Updater.Combine(updates).CurrentDate(i => i.ModifiedOn);
-                var result = await Collection.UpdateManyAsync(filter, update.CurrentDate(i => i.ModifiedOn));
+                var update = Updater.Combine(updates).CurrentDate(i => i.ModifiedAt);
+                var result = await Collection.UpdateManyAsync(filter, update.CurrentDate(i => i.ModifiedAt));
                 return result.IsAcknowledged;
             });
         }
@@ -1009,7 +1009,7 @@ namespace MongoDB.Data
         {
             return Retry(() =>
             {
-                var update = Updater.Combine(updates).CurrentDate(i => i.ModifiedOn);
+                var update = Updater.Combine(updates).CurrentDate(i => i.ModifiedAt);
                 return Collection.UpdateMany(filter, update).IsAcknowledged;
             });
         }
@@ -1023,7 +1023,7 @@ namespace MongoDB.Data
         {
             return Retry(async () =>
             {
-                var update = Updater.Combine(updates).CurrentDate(i => i.ModifiedOn);
+                var update = Updater.Combine(updates).CurrentDate(i => i.ModifiedAt);
                 var result = await Collection.UpdateManyAsync(filter, update);
                 return result.IsAcknowledged;
             });

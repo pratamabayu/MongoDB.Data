@@ -8,7 +8,7 @@ namespace MongoDB.Data
     [BsonIgnoreExtraElements(Inherited = true)]
     public abstract class Model : IModel
     {
-        private DateTime createdOn;
+        private DateTime createdAt;
 
         /// <summary>
         /// id in string format
@@ -21,27 +21,27 @@ namespace MongoDB.Data
         /// <summary>
         /// create date
         /// </summary>
-        [BsonElement("createdOn", Order = 1), JsonProperty("createdOn")]
-        public DateTime CreatedOn
+        [BsonElement("createdAt", Order = 1), JsonProperty("createdAt")]
+        public DateTime CreatedAt
         {
             get
             {
-                if (createdOn == null || createdOn == DateTime.MinValue)
-                    createdOn = ObjectId.CreationTime;
-                return createdOn;
+                if (createdAt == DateTime.MinValue)
+                    createdAt = ObjectId.CreationTime;
+                return createdAt;
             }
             set
             {
-                createdOn = value;
+                createdAt = value;
             }
         }
 
         /// <summary>
         /// modify date
         /// </summary>
-        [BsonElement("modifiedOn", Order = 2), JsonProperty("modifiedOn")]
+        [BsonElement("modifiedAt", Order = 2), JsonProperty("modifiedAt")]
         [BsonRepresentation(BsonType.DateTime)]
-        public DateTime ModifiedOn { get; set; }
+        public DateTime ModifiedAt { get; set; }
 
         /// <summary>
         /// id in objectId format
